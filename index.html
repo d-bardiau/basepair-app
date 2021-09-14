@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="./manifest.json">
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="scripts.js"></script>
+    <title>Static Template</title>
+  </head>
+  <body x-data="appScope()">
+    <div x-show="isLoggedIn && isInstitutionSelected" class="appFrame">
+      <div class="navigationBar">
+        <div class="menuButtonContainer">
+          <button @click="openSideMenu" class="menuButton"><i data-feather="menu"></i></button>
+        </div>
+        <div class="titleLine"></div>
+        <div class="logo">
+          <image src="images/unilogo.png">
+        </div>
+      </div>
+      <div class="content">
+        <div class="scrollBox">
+          <div x-show="getIsActiveTabName(['info', 'printer'])" class="welcomePicture">
+            <img src="images/campus.jpg">
+          </div>
+          <div class="userInfo">
+            <img x-show="getIsActiveTabName(['info', 'printer'])" class="userInfoImage" x-bind:src="getUserImagePath()">
+            <div x-show="getIsActiveTabName(['info', 'printer'])" class="userInfoImagePadding"></div>
+            <h4 x-text="getUserName()"></h4>
+            <h4 x-text="getUserStatus()" :class="{lessMargin: getIsActiveTabName('news')}"></h4>
+          </div>
+  <!--    <div x-show="getIsActiveTabName('news')" class="newsContainer">
+            <h4>Neuigkeiten</h4>
+            <template x-for="(item, index) in itemRange" :key="index">
+              <div class="newsBox" >
+                <h5>Lorem ipsum dolor sit amet</h5>
+                <p>consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+              </div>
+            </template>
+          </div>-->
+          <div class="flexStretchContainer">
+            <img x-show="getIsActiveTabName('ID') && !getIsUserStudent()" x-bind:src="getUserImagePath()" class="portraitImage"></img>
+            <canvas x-show="getIsActiveTabName('ID') && getIsUserStudent()" x-ref="idCanvas" @click="toggleStudentIdMax" class="studentId" :class="{isMax: isStudentIdMaxed}" width="300" height="193"></canvas>
+            <img x-show="getIsActiveTabName('ID') && getIsUserStudent()" class="studentTicket" @click="toggleStudentTicketMax" :class="{isMax: isStudentTicketMaxed}" src="images/ticket.jpg"></img>
+            <img x-show="getIsActiveTabName('library')" src="images/barcode.jpg"></img>
+            <img x-show="getIsActiveTabName('printer')" class="nfc-logo" src="images/nfc-logo.png"></img>
+            <img x-show="getIsActiveTabName('payment')" @click="handleQrCodeClick" src="images/qr_code.png" class="qrcode"></img>
+          </div>
+        </div>
+    </div>
+      <div class="toolbar basepairHeader">basepair</div>
+      <div class="toolbar">
+        <div @click="setActiveTabNameTo('printer')" :class="{active: getIsActiveTabName('printer')}" class="tab"><i data-feather="wifi"></i></div>
+        <div @click="setActiveTabNameTo('payment')" :class="{active: getIsActiveTabName('payment')}" class="tab"><i data-feather="credit-card"></i></div>
+        <div @click="setActiveTabNameTo('ID')" :class="{active: getIsActiveTabName('ID')}" class="tab"><i data-feather="user"></i></div>
+        <!--    <div @click="setActiveTabNameTo('library')" :class="{active: getIsActiveTabName('library')}" class="tab"><i data-feather="book"></i></div>-->      
+      </div>
+      <div class="sideMenu" :class="{active: isSideMenuActive === true}">
+        <button @click="closeSideMenu" class="menuCloseButton"><i data-feather="arrow-left"></i></button>
+        <div class="sideMenuItems">
+          <div class="menuItem"><i class="menuItemIcon" data-feather="file-text"></i><span>Personendaten</span></div>
+          <div class="menuItem"><i class="menuItemIcon" data-feather="briefcase"></i><span>Bezahlvorgänge</span></div>
+          <div class="menuItem"><i class="menuItemIcon" data-feather="user-check"></i><span>Rückmeldung</span></div>
+          <div class="menuItem"><i class="menuItemIcon" data-feather="settings"></i><span>Einstellungen</span></div>
+          <div class="menuItem"><i class="menuItemIcon" data-feather="home"></i><span>Institution wechseln</span></div>
+          <div @click="logout" class="menuItem"><i class="menuItemIcon" data-feather="log-out"></i><span>Logout</span></div>
+        </div>
+      </div>
+      <div x-show="isPopupVisible === true" @click="handlePopupClick" class="popup"><h5>Bezahlung erfolgreich</h5><i class="popupIcon" data-feather="check-circle"></i></div>
+      <div x-show="isPinpadVisible === true" class="popup pinpad"><h5>PIN eingeben</h5><input type="password"><div @click="handlePaymentSubmitClick"><i class="popupIcon" data-feather="corner-down-left"></i></div></div>
+    </div>
+    <div x-show="!isLoggedIn" class="appFrame loginFrame">
+      <image src="images/basepair.png"></image>
+      <div class="loginForm">
+        <span>E-Mail</span><input x-model="loginEmail"></input>
+        <span>Passwort</span><input x-model="loginPassword"></input>
+        <button @click="submitLogin">Anmelden</button>
+      </div>
+    </div>
+    <div x-show="isLoggedIn && !isInstitutionSelected" class="appFrame institutionFrame">
+      <div class="institutionBoxContainer">
+        <div @click="selectInstitution" class="institutionBox"><image src="images/wwulogoklein.png"></image><span>Universität Münster</span></div>
+        <div class="institutionBox"><image src="images/fhmuensterlogo.jpg"></image><span>Fachhochschule Münster</span></div>
+        <div class="institutionBox icon"><i class="addInstitutionIcon" data-feather="plus"></i><span>Konto hinzufügen</span></div>
+      </div>
+    </div>
+  </body>
+</html>
